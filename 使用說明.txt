@@ -1,4 +1,6 @@
-MarkitDown 批次轉換器 — 使用說明
+========================================
+ MarkitDown 批次轉換器 — 使用說明
+========================================
 
 這是一個把各種文件（PDF、Word、PowerPoint、Excel、圖片、HTML、CSV…）
 批次轉成 Markdown (.md) 的免安裝工具。
@@ -16,6 +18,38 @@ MarkitDown 批次轉換器 — 使用說明
 4. 轉出的 .md 檔會沿用原本的檔名（例如 報告.docx → 報告.md）
    ※ 輸出資料夾裡的同名 .md 會被直接覆寫
 
+【切換語言】
+右上角的按鈕可切換中文 / 英文介面（按鈕顯示的是「另一種」語言）。
+
 【注意事項】
 - 音訊檔轉換需要電腦另外安裝 ffmpeg，其他格式不受影響
 - 本工具完全離線運作，檔案不會上傳到任何地方
+
+
+========================================
+ MarkitDown Batch Converter — Quick Start
+========================================
+
+A portable tool that batch-converts documents (PDF, Word, PowerPoint, Excel,
+images, HTML, CSV, and more) into Markdown (.md).
+
+[ Getting started ]
+1. Unzip the whole "MarkitDown轉換器" folder anywhere (don't copy just the exe).
+2. Double-click "MarkitDown轉換器.exe" inside the folder.
+3. On first launch Windows may show "Windows protected your PC" —
+   click "More info" -> "Run anyway" (the app is unsigned).
+
+[ How to use ]
+1. Click "Add Files" to select multiple files at once.
+2. Confirm or change the "Output folder".
+3. Click "Start Converting"; the list shows each file's status.
+4. Output .md files keep the original name (e.g. report.docx -> report.md).
+   Note: an existing .md with the same name will be overwritten.
+
+[ Switch language ]
+Use the button in the top-right corner to switch between Chinese and English
+(the button shows the OTHER language).
+
+[ Notes ]
+- Audio conversion needs ffmpeg installed separately; other formats are fine.
+- The tool runs fully offline; your files are never uploaded.

@@ -1,5 +1,6 @@
-# 打包成免安裝資料夾（PyInstaller onedir 模式）
+﻿# 打包成免安裝資料夾（PyInstaller onedir 模式）
 # 用法：在專案根目錄執行 .\build.ps1，輸出在 dist\MarkitDown轉換器\，並產生對應 zip
+# 注意：本檔須以「UTF-8 含 BOM」儲存，否則 Windows PowerShell 5.1 會用 ANSI 讀取而使中文引號解析錯亂。
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 

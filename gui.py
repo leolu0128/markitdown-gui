@@ -1,4 +1,4 @@
-"""MarkitDown GUI 批次轉換工具。"""
+"""MarkitDown GUI 批次轉換工具（中／英雙語）。"""
 from __future__ import annotations
 
 import os
@@ -40,17 +40,90 @@ def convert_one(src_path: str | Path, out_dir: str | Path) -> tuple[bool, str]:
 
 POLL_MS = 100
 
-STATUS_WAITING = "等待中"
-STATUS_RUNNING = "⏳ 轉換中…"
+# 介面字串翻譯表。兩種語言必須有完全相同的鍵（由 test_translation_keys_match 保證）。
+# lang_button 顯示「另一個」語言，點下去即切換到該語言。
+STRINGS = {
+    "zh": {
+        "title": "MarkitDown 批次轉換器",
+        "lang_button": "EN",
+        "add_files": "加入檔案",
+        "remove_selected": "移除選取",
+        "clear_all": "清空清單",
+        "col_file": "檔案",
+        "col_status": "狀態",
+        "output_folder": "輸出資料夾：",
+        "browse": "瀏覽…",
+        "start": "開始轉換",
+        "hint_add": "請加入檔案",
+        "status_waiting": "等待中",
+        "status_running": "⏳ 轉換中…",
+        "status_ok": "✅ 完成",
+        "status_fail": "❌ {msg}",
+        "progress": "{done}/{total} 完成",
+        "finished_status": "完成：成功 {ok}／失敗 {fail}",
+        "dlg_pick_files": "選擇要轉換的檔案",
+        "dlg_pick_out": "選擇輸出資料夾",
+        "warn_no_files_title": "尚未選擇檔案",
+        "warn_no_files_msg": "請先按「加入檔案」選擇要轉換的檔案。",
+        "warn_no_out_title": "尚未選擇輸出資料夾",
+        "warn_no_out_msg": "請先選擇 Markdown 的輸出資料夾。",
+        "done_title": "轉換完成",
+        "done_msg": "成功 {ok} 個、失敗 {fail} 個。\n要開啟輸出資料夾嗎？",
+    },
+    "en": {
+        "title": "MarkitDown Batch Converter",
+        "lang_button": "中",
+        "add_files": "Add Files",
+        "remove_selected": "Remove Selected",
+        "clear_all": "Clear List",
+        "col_file": "File",
+        "col_status": "Status",
+        "output_folder": "Output folder:",
+        "browse": "Browse…",
+        "start": "Start Converting",
+        "hint_add": "Please add files",
+        "status_waiting": "Waiting",
+        "status_running": "⏳ Converting…",
+        "status_ok": "✅ Done",
+        "status_fail": "❌ {msg}",
+        "progress": "{done}/{total} done",
+        "finished_status": "Finished: {ok} succeeded / {fail} failed",
+        "dlg_pick_files": "Select files to convert",
+        "dlg_pick_out": "Select output folder",
+        "warn_no_files_title": "No files selected",
+        "warn_no_files_msg": 'Please click "Add Files" to choose files first.',
+        "warn_no_out_title": "No output folder",
+        "warn_no_out_msg": "Please select an output folder for the Markdown files.",
+        "done_title": "Conversion complete",
+        "done_msg": "{ok} succeeded, {fail} failed.\nOpen the output folder?",
+    },
+}
 
 
 def main() -> None:
     root = tk.Tk()
-    root.title("MarkitDown 批次轉換器")
-    root.geometry("680x500")
-    root.minsize(560, 400)
+    root.geometry("680x520")
+    root.minsize(560, 420)
+
+    # 目前語言與各列狀態都放在可變 dict，供閉包更新用。
+    ui = {"lang": "zh"}
+    # iid -> ("waiting" | "running" | "ok" | "fail", 錯誤訊息)
+    row_state: dict[str, tuple[str, str]] = {}
+    # 狀態列狀態：("hint",) / ("progress", done, total) / ("finished", ok, fail)
+    line_state: tuple = ("hint",)
 
     progress_q: queue.Queue = queue.Queue()
+    out_var = tk.StringVar()
+
+    def t(key: str, **kw) -> str:
+        text = STRINGS[ui["lang"]][key]
+        return text.format(**kw) if kw else text
+
+    # --- 頂部語言列 ---
+    topbar = ttk.Frame(root, padding=(8, 8, 8, 0))
+    topbar.pack(fill="x")
+    lang_btn = ttk.Button(topbar, width=4)
+    lang_btn.pack(side="right")
 
     # --- 檔案清單 ---
     list_frame = ttk.Frame(root, padding=(8, 8, 8, 0))
@@ -59,8 +132,6 @@ def main() -> None:
     tree = ttk.Treeview(
         list_frame, columns=("name", "status"), show="headings", selectmode="extended"
     )
-    tree.heading("name", text="檔案")
-    tree.heading("status", text="狀態")
     tree.column("name", width=430)
     tree.column("status", width=180)
     scroll = ttk.Scrollbar(list_frame, orient="vertical", command=tree.yview)
@@ -68,57 +139,95 @@ def main() -> None:
     tree.pack(side="left", fill="both", expand=True)
     scroll.pack(side="right", fill="y")
 
-    out_var = tk.StringVar()
-
-    def add_files() -> None:
-        paths = filedialog.askopenfilenames(title="選擇要轉換的檔案")
-        for p in paths:
-            if not tree.exists(p):  # 以完整路徑當 iid，自動去重
-                tree.insert("", "end", iid=p, values=(Path(p).name, STATUS_WAITING))
-        if paths and not out_var.get():
-            out_var.set(str(Path(paths[0]).parent))
-
-    def remove_selected() -> None:
-        for iid in tree.selection():
-            tree.delete(iid)
-
-    def clear_all() -> None:
-        tree.delete(*tree.get_children())
-
+    # --- 檔案操作按鈕 ---
     btn_frame = ttk.Frame(root, padding=8)
     btn_frame.pack(fill="x")
-    ttk.Button(btn_frame, text="加入檔案", command=add_files).pack(side="left")
-    ttk.Button(btn_frame, text="移除選取", command=remove_selected).pack(
-        side="left", padx=(8, 0)
-    )
-    ttk.Button(btn_frame, text="清空清單", command=clear_all).pack(
-        side="left", padx=(8, 0)
-    )
+    add_btn = ttk.Button(btn_frame)
+    add_btn.pack(side="left")
+    remove_btn = ttk.Button(btn_frame)
+    remove_btn.pack(side="left", padx=(8, 0))
+    clear_btn = ttk.Button(btn_frame)
+    clear_btn.pack(side="left", padx=(8, 0))
 
     # --- 輸出資料夾 ---
     out_frame = ttk.Frame(root, padding=(8, 0, 8, 8))
     out_frame.pack(fill="x")
-    ttk.Label(out_frame, text="輸出資料夾：").pack(side="left")
+    out_label = ttk.Label(out_frame)
+    out_label.pack(side="left")
     ttk.Entry(out_frame, textvariable=out_var).pack(
         side="left", fill="x", expand=True, padx=(4, 4)
     )
-
-    def browse_out() -> None:
-        chosen = filedialog.askdirectory(title="選擇輸出資料夾")
-        if chosen:
-            out_var.set(chosen)
-
-    ttk.Button(out_frame, text="瀏覽…", command=browse_out).pack(side="left")
+    browse_btn = ttk.Button(out_frame)
+    browse_btn.pack(side="left")
 
     # --- 進度區 ---
     bottom = ttk.Frame(root, padding=(8, 0, 8, 8))
     bottom.pack(fill="x")
     progress = ttk.Progressbar(bottom, mode="determinate")
     progress.pack(fill="x")
-    status_var = tk.StringVar(value="請加入檔案")
+    status_var = tk.StringVar()
     ttk.Label(bottom, textvariable=status_var).pack(anchor="w", pady=(4, 0))
-    start_btn = ttk.Button(bottom, text="開始轉換")
+    start_btn = ttk.Button(bottom)
     start_btn.pack(anchor="e", pady=(4, 0))
+
+    def render_row(iid: str) -> None:
+        state, msg = row_state[iid]
+        if state == "fail":
+            tree.set(iid, "status", t("status_fail", msg=msg))
+        else:
+            tree.set(iid, "status", t(f"status_{state}"))
+
+    def render_status_line() -> None:
+        kind = line_state[0]
+        if kind == "hint":
+            status_var.set(t("hint_add"))
+        elif kind == "progress":
+            status_var.set(t("progress", done=line_state[1], total=line_state[2]))
+        elif kind == "finished":
+            status_var.set(t("finished_status", ok=line_state[1], fail=line_state[2]))
+
+    def apply_lang() -> None:
+        root.title(t("title"))
+        lang_btn.config(text=t("lang_button"))
+        add_btn.config(text=t("add_files"))
+        remove_btn.config(text=t("remove_selected"))
+        clear_btn.config(text=t("clear_all"))
+        tree.heading("name", text=t("col_file"))
+        tree.heading("status", text=t("col_status"))
+        out_label.config(text=t("output_folder"))
+        browse_btn.config(text=t("browse"))
+        start_btn.config(text=t("start"))
+        for iid in row_state:
+            render_row(iid)
+        render_status_line()
+
+    def toggle_lang() -> None:
+        ui["lang"] = "en" if ui["lang"] == "zh" else "zh"
+        apply_lang()
+
+    def add_files() -> None:
+        paths = filedialog.askopenfilenames(title=t("dlg_pick_files"))
+        for p in paths:
+            if not tree.exists(p):  # 以完整路徑當 iid，自動去重
+                tree.insert("", "end", iid=p, values=(Path(p).name, ""))
+                row_state[p] = ("waiting", "")
+                render_row(p)
+        if paths and not out_var.get():
+            out_var.set(str(Path(paths[0]).parent))
+
+    def remove_selected() -> None:
+        for iid in tree.selection():
+            tree.delete(iid)
+            row_state.pop(iid, None)
+
+    def clear_all() -> None:
+        tree.delete(*tree.get_children())
+        row_state.clear()
+
+    def browse_out() -> None:
+        chosen = filedialog.askdirectory(title=t("dlg_pick_out"))
+        if chosen:
+            out_var.set(chosen)
 
     def worker(paths: list[str], out_dir: str) -> None:
         total = len(paths)
@@ -132,48 +241,63 @@ def main() -> None:
         progress_q.put(("finished", ok_count, total, out_dir))
 
     def start() -> None:
+        nonlocal line_state
         paths = list(tree.get_children())
         out_dir = out_var.get().strip()
         if not paths:
-            messagebox.showwarning("尚未選擇檔案", "請先按「加入檔案」選擇要轉換的檔案。")
+            messagebox.showwarning(t("warn_no_files_title"), t("warn_no_files_msg"))
             return
         if not out_dir:
-            messagebox.showwarning("尚未選擇輸出資料夾", "請先選擇 Markdown 的輸出資料夾。")
+            messagebox.showwarning(t("warn_no_out_title"), t("warn_no_out_msg"))
             return
         start_btn.config(state="disabled")
         progress.config(maximum=len(paths), value=0)
         for p in paths:
-            tree.set(p, "status", STATUS_WAITING)
-        status_var.set(f"0/{len(paths)} 完成")
+            row_state[p] = ("waiting", "")
+            render_row(p)
+        line_state = ("progress", 0, len(paths))
+        render_status_line()
         threading.Thread(target=worker, args=(paths, out_dir), daemon=True).start()
 
-    start_btn.config(command=start)
-
     def poll() -> None:
+        nonlocal line_state
         try:
             while True:
                 event = progress_q.get_nowait()
                 kind = event[0]
                 if kind == "start":
-                    tree.set(event[1], "status", STATUS_RUNNING)
+                    iid = event[1]
+                    row_state[iid] = ("running", "")
+                    render_row(iid)
                 elif kind == "done":
                     _, path, ok, msg, done, total = event
-                    tree.set(path, "status", "✅ 完成" if ok else f"❌ {msg}")
+                    row_state[path] = ("ok", "") if ok else ("fail", msg)
+                    render_row(path)
                     progress.config(value=done)
-                    status_var.set(f"{done}/{total} 完成")
+                    line_state = ("progress", done, total)
+                    render_status_line()
                 elif kind == "finished":
                     _, ok_count, total, out_dir = event
                     start_btn.config(state="normal")
-                    status_var.set(f"完成：成功 {ok_count}／失敗 {total - ok_count}")
+                    line_state = ("finished", ok_count, total - ok_count)
+                    render_status_line()
                     if messagebox.askyesno(
-                        "轉換完成",
-                        f"成功 {ok_count} 個、失敗 {total - ok_count} 個。\n要開啟輸出資料夾嗎？",
+                        t("done_title"),
+                        t("done_msg", ok=ok_count, fail=total - ok_count),
                     ):
                         os.startfile(out_dir)
         except queue.Empty:
             pass
         root.after(POLL_MS, poll)
 
+    lang_btn.config(command=toggle_lang)
+    add_btn.config(command=add_files)
+    remove_btn.config(command=remove_selected)
+    clear_btn.config(command=clear_all)
+    browse_btn.config(command=browse_out)
+    start_btn.config(command=start)
+
+    apply_lang()
     root.after(POLL_MS, poll)
     root.mainloop()
 
