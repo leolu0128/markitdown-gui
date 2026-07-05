@@ -179,4 +179,10 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    import sys
+
+    # 隱藏參數：--selftest <來源檔> <輸出資料夾>，供打包後自動驗證用（windowed 模式無主控台，以結束碼回報）
+    if len(sys.argv) == 4 and sys.argv[1] == "--selftest":
+        ok, _msg = convert_one(sys.argv[2], sys.argv[3])
+        sys.exit(0 if ok else 1)
     main()
