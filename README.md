@@ -2,12 +2,12 @@
 
 A small desktop GUI that batch-converts documents (PDF, Word, PowerPoint, Excel,
 images, HTML, CSV, and more) into Markdown, built on Microsoft's
-[markitdown](https://github.com/microsoft/markitdown). Bilingual interface
-(English / 繁體中文) with a one-click language toggle.
+[markitdown](https://github.com/microsoft/markitdown) **v0.1.6**. Bilingual
+interface (English / 繁體中文) with a one-click language toggle.
 
 一個把各種文件（PDF、Word、PowerPoint、Excel、圖片、HTML、CSV…）批次轉成
 Markdown 的桌面工具，底層使用微軟的
-[markitdown](https://github.com/microsoft/markitdown)。介面支援中英雙語，一鍵切換。
+[markitdown](https://github.com/microsoft/markitdown) **v0.1.6**。介面支援中英雙語，一鍵切換。
 
 ---
 
