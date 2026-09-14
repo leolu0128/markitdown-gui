@@ -2,12 +2,19 @@
 
 A small desktop GUI that batch-converts documents (PDF, Word, PowerPoint, Excel,
 images, HTML, CSV, and more) into Markdown, built on Microsoft's
-[markitdown](https://github.com/microsoft/markitdown) **v0.1.6**. Bilingual
+[markitdown](https://github.com/microsoft/markitdown) **v0.1.8b1**. Bilingual
 interface (English / 繁體中文) with a one-click language toggle.
 
 一個把各種文件（PDF、Word、PowerPoint、Excel、圖片、HTML、CSV…）批次轉成
 Markdown 的桌面工具，底層使用微軟的
-[markitdown](https://github.com/microsoft/markitdown) **v0.1.6**。介面支援中英雙語，一鍵切換。
+[markitdown](https://github.com/microsoft/markitdown) **v0.1.8b1**。介面支援中英雙語，一鍵切換。
+
+> Note: markitdown 0.1.8b1 is an upstream pre-release (beta). It is pinned
+> exactly in `requirements.txt`, so `pip install -r requirements.txt` installs
+> it without needing `--pre`.
+>
+> 註：markitdown 0.1.8b1 是上游的 beta 版。`requirements.txt` 已精確釘選該版本，
+> 因此執行 `pip install -r requirements.txt` 不需額外加 `--pre` 即可安裝。
 
 ---
 

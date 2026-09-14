@@ -22,7 +22,7 @@
 右上角的按鈕可切換中文 / 英文介面（按鈕顯示的是「另一種」語言）。
 
 【注意事項】
-- 本工具基於微軟 markitdown v0.1.6 製作
+- 本工具基於微軟 markitdown v0.1.8b1 製作
 - 音訊檔轉換需要電腦另外安裝 ffmpeg，其他格式不受影響
 - 本工具完全離線運作，檔案不會上傳到任何地方
 
@@ -52,6 +52,6 @@ Use the button in the top-right corner to switch between Chinese and English
 (the button shows the OTHER language).
 
 [ Notes ]
-- Built on Microsoft markitdown v0.1.6.
+- Built on Microsoft markitdown v0.1.8b1.
 - Audio conversion needs ffmpeg installed separately; other formats are fine.
 - The tool runs fully offline; your files are never uploaded.
