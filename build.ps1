@@ -4,6 +4,10 @@
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
+# zip 檔名刻意使用純 ASCII：GitHub Releases 會把附件檔名中的非 ASCII 字元濾掉，
+# 中文檔名上傳後會變成 MarkitDown.-Windows.zip 這種殘缺名稱。
+$zip = "dist\MarkitDown-Batch-Converter-Windows-portable.zip"
+
 & .\.venv\Scripts\pyinstaller.exe --noconfirm --clean --windowed `
     --name "MarkitDown轉換器" `
     --collect-all markitdown `
@@ -12,5 +16,5 @@ Set-Location $PSScriptRoot
     gui.py
 
 Copy-Item "使用說明.txt" "dist\MarkitDown轉換器\" -Force
-Compress-Archive -Path "dist\MarkitDown轉換器" -DestinationPath "dist\MarkitDown轉換器-Windows免安裝版.zip" -Force
-Write-Host "完成：dist\MarkitDown轉換器-Windows免安裝版.zip"
+Compress-Archive -Path "dist\MarkitDown轉換器" -DestinationPath $zip -Force
+Write-Host "完成：$zip"

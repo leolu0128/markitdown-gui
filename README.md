@@ -49,7 +49,7 @@ JSON, XML, ZIP, EPUB, and more — see the
 
 ## For end users (no Python needed) / 一般使用者（免安裝 Python）
 
-1. Download the latest `MarkitDown轉換器-Windows免安裝版.zip` from the
+1. Download the latest `MarkitDown-Batch-Converter-Windows-portable.zip` from the
    [Releases](../../releases) page.
 2. Unzip the **whole folder** anywhere (don't copy just the `.exe` out on its own).
 3. Double-click `MarkitDown轉換器.exe`.
@@ -60,7 +60,7 @@ Then: **Add Files** → confirm the **Output folder** → **Start Converting**.
 
 —
 
-1. 到 [Releases](../../releases) 頁面下載最新的 `MarkitDown轉換器-Windows免安裝版.zip`。
+1. 到 [Releases](../../releases) 頁面下載最新的 `MarkitDown-Batch-Converter-Windows-portable.zip`。
 2. 把**整個資料夾**解壓縮到任意位置（不要只把 `.exe` 單獨複製出來）。
 3. 雙擊 `MarkitDown轉換器.exe`。
 4. 第一次開啟時 Windows 可能顯示「Windows 已保護您的電腦」，
@@ -92,10 +92,13 @@ Windows 上也可以直接雙擊 `MarkitDown轉換器.bat`，它會用 `pythonw.
 ```
 
 This runs PyInstaller in onedir mode and produces
-`dist\MarkitDown轉換器-Windows免安裝版.zip` (~109 MB zipped, ~203 MB unzipped).
+`dist\MarkitDown-Batch-Converter-Windows-portable.zip` (~109 MB zipped, ~203 MB
+unzipped). The zip name is deliberately ASCII-only: GitHub strips non-ASCII
+characters from release asset filenames.
 
 會以 PyInstaller onedir 模式打包，產出
-`dist\MarkitDown轉換器-Windows免安裝版.zip`（壓縮後約 109 MB，解壓後約 203 MB）。
+`dist\MarkitDown-Batch-Converter-Windows-portable.zip`（壓縮後約 109 MB，解壓後約
+203 MB）。zip 檔名刻意使用純 ASCII——GitHub Releases 會濾掉附件檔名中的非 ASCII 字元。
 
 ## Run the tests / 執行測試
 
